@@ -18,7 +18,7 @@ discordMSG = []
 
 #irc
 ircNickname = "MyBot"
-ircServerIP = "irc.popicraft.net"
+ircServerIP = "irc.server.net"
 ircChannel = "#test"
 customStart = ""
 
