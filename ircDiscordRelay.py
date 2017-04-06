@@ -18,8 +18,8 @@ discordMSG = []
 
 #irc
 ircNickname = "MyBot"
-ircServerIP = "irc.server.net"
-ircChannel = "#test"
+ircServerIP = "irc.popicraft.net"
+#ircChannel = "#test"
 customStart = ""
 
 
@@ -60,7 +60,7 @@ youtube = ""
 firstRun = "off"
 
 #used as global varibles and were defined before we start using them to avoid problems down the road
-channelToUse = ""
+channelToUse = "#popicraft"
 
 haltDiscordMSG = 0
 haltDeleteMSG = 0
@@ -162,7 +162,7 @@ async def on_message(message): #waits for the discord message event and pulls it
         if str(channelToUse.name) == str(message.channel) and str(message.author) != botName: #this checks to see if it is using the correct discord channel to make sure its the right channel. also checks to make sure the botname isnt our discord bot name
             print("{0} : {1}".format(message.author,message.content)) #prints this to the screen
             #await client.send_message(message.channel, 'Hello.')          
-            ircSendMSG(message.author,"#test",message.content)
+            ircSendMSG(message.author,ircChannel,message.content)
 
 ##file load and save stuff
 
