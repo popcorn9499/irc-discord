@@ -17,9 +17,9 @@ import pydle
 discordMSG = []
 
 #irc
-ircNickname = "MyBot"
+ircNickname = "DiscordBot"
 ircServerIP = "irc.popicraft.net"
-#ircChannel = "#test"
+ircChannel = "#popicraft"
 customStart = ""
 
 
@@ -60,7 +60,7 @@ youtube = ""
 firstRun = "off"
 
 #used as global varibles and were defined before we start using them to avoid problems down the road
-channelToUse = "#popicraft"
+channelToUse = ""
 
 haltDiscordMSG = 0
 haltDeleteMSG = 0
@@ -261,9 +261,15 @@ class MyClient(pydle.Client):
     def on_join(self, channel, user):
         super().on_join(channel, user)
         
+    def on_disconnect(self,expected): #this event detects disconnects
+        #this will stop the irc event loop from running in the event that something goes wrong and the connection fails
+        print(expected) 
+        self.connection.stop() #this will stop the irc thread
+
         
     def on_channel_message(self,target,by,message):
         global discordMSG
+        #self.connection.stop() #this stops the event loop when the client gives up just need to figure out how to determine that
         super().on_channel_message(target,by,message) 
         print(target + ":" + by +  ":" + message )
         msg = config["IRCToDiscordFormatting"].format(target,by,message) #this reformats the irc chat for discord
@@ -279,9 +285,11 @@ def ircSendMSG(user,target,msg): #sends a message to the irc
 ##possibly could of put all this in a class and been done with it?
 def start():
     global ircClient
-    ircClient = MyClient(ircNickname)
-    ircClient.connect(ircServerIP) ##add a option for /pass user:pass this is how znc lets u login
-    ircClient.handle_forever()
+    while True:#this infinite loop should force the irc thread back when the irc client disconnects and closes
+        ircClient = MyClient(ircNickname)
+        ircClient.connect(ircServerIP) ##add a option for /pass user:pass this is how znc lets u login
+        ircClient.handle_forever()
+        print("irc died")
 
 
 
@@ -295,6 +303,9 @@ ircThread.start() #starts the irc bot
 
 discordThread = threading.Thread(target=client.run(config["discordToken"]))#creates the thread for the discord bot
 discordThread.start() #starts the discord bot
+
+
+
 
 
 
