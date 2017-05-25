@@ -285,27 +285,38 @@ def ircSendMSG(user,target,msg): #sends a message to the irc
 ##possibly could of put all this in a class and been done with it?
 def start():
     global ircClient
-    while True:#this infinite loop should force the irc thread back when the irc client disconnects and closes
-        ircClient = MyClient(ircNickname)
-        ircClient.connect(ircServerIP) ##add a option for /pass user:pass this is how znc lets u login
-        ircClient.handle_forever()
-        print("irc died")
+    #while True:#this infinite loop should force the irc thread back when the irc client disconnects and closes
+    ircClient = MyClient(ircNickname)
+    ircClient.connect(ircServerIP) ##add a option for /pass user:pass this is how znc lets u login
+    ircClient.handle_forever()
+    print("irc died")
 
+def ircCheck():
+    ircThread = threading.Thread(target=start) #creates the thread for the irc client
 
+    ircThread.start() #starts the irc bot
+    while True:
+        time.sleep(2)
+        state = ircThread.isAlive()
+        if state == False:
+            print("damn it")
+            ircThread = threading.Thread(target=start) #creates the thread for the irc client
+
+            ircThread.start() #starts the irc bot
+            
 
 
 ##main loop for the code
-ircThread = threading.Thread(target=start) #creates the thread for the irc client
-ircThread.start() #starts the irc bot
+
 
 #deleteThread = threading.Thread(target=deleteIrcToDiscordMsgThread) #this is broken and needs rewriting
 #deleteThread.start()
 
+ircCheckThread = threading.Thread(target=ircCheck)#starts my irc check thread which should print false if the irc thread dies.
+ircCheckThread.start()
+
 discordThread = threading.Thread(target=client.run(config["discordToken"]))#creates the thread for the discord bot
 discordThread.start() #starts the discord bot
-
-
-
 
 
 
