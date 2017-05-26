@@ -285,10 +285,11 @@ def ircSendMSG(user,target,msg): #sends a message to the irc
 ##possibly could of put all this in a class and been done with it?
 def start():
     global ircClient
+    print(ircClient)
     #while True:#this infinite loop should force the irc thread back when the irc client disconnects and closes
-    if ircClient == 0: #this only redoes this once
-        ircClient = MyClient(ircNickname)
-        ircClient.connect(ircServerIP) ##add a option for /pass user:pass this is how znc lets u login
+    ircClient = MyClient(ircNickname)
+    ircClient.connect(ircServerIP) ##add a option for /pass user:pass this is how znc lets u login
+    print(ircClient)
     ircClient.handle_forever()
     print("irc died")
 
