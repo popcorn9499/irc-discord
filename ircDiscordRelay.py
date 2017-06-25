@@ -19,6 +19,7 @@ discordMSG = []
 #irc
 ircNickname = "DiscordBot"
 ircServerIP = "irc.popicraft.net"
+ircPort = 6667
 ircChannel = "#popicraft"
 customStart = ""
 
@@ -263,8 +264,20 @@ class MyClient(pydle.Client):
         
     def on_disconnect(self,expected): #this event detects disconnects
         #this will stop the irc event loop from running in the event that something goes wrong and the connection fails
-        print(expected) 
-        self.connection.stop() #this will stop the irc thread
+        print(expected) #prints a debug of if the client disconnected
+        retry =  0 #sets the 
+        time.sleep(15) #waits a few seconds till the first retry
+        while retry <= 50: #forces a reconnect if something goes wrong
+            self._reset_connection_attributes() #resets connection info
+            print("retrying connection") 
+            self.connect(ircServerIP,ircPort) #starts the connection
+            time.sleep(15) #waits so the client can finish connecting and things can actually be processes
+            print(self.connected) #status connected or not
+            if self.connected: #if connected to irc server leave this loop and be done.
+                retry = 59
+            else:
+                self.connection.stop() #alternative if it failes and go through the previous method that worked partially.
+            retry = retry + 1 #keeps going up till the number or retries is hit
 
         
     def on_channel_message(self,target,by,message):
@@ -319,6 +332,10 @@ ircCheckThread.start()
 
 discordThread = threading.Thread(target=client.run(config["discordToken"]))#creates the thread for the discord bot
 discordThread.start() #starts the discord bot
+
+
+
+
 
 
 
