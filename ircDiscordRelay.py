@@ -17,10 +17,10 @@ import pydle
 discordMSG = []
 
 #irc
-ircNickname = "DiscordBot"
-ircServerIP = "irc.popicraft.net"
+ircNickname = "nickName"
+ircServerIP = "serverIp"
 ircPort = 6667
-ircChannel = "#popicraft"
+ircChannel = "#channelName"
 customStart = ""
 
 
