@@ -49,7 +49,20 @@ customStart = ""
 
 
 ####variables
-config = {"channelName": "", "pageToken": "", "serverName": "", "discordToken": "","discordToIRCFormating": "", "IRCToDiscordFormatting":""}
+config = {
+    "IRCToDiscordFormatting": "{1} : {2}",
+    "channelName": "discordChannel",
+    "discordToIRCFormating": "{0} : {1}",
+    "discordToken": "discord token",
+    "ircChannel": "ircChannel",
+    "ircNickname": "ircBotNick",
+    "ircPassword": "irc server password if any. otherwise leave this blank.",
+    "ircPort": "irc port. default is 6667",
+    "ircServerIP": "irc server ip",
+    "pageToken": "",
+    "serverName": "discord server name"
+}
+
 
 botName = "none"
 
