@@ -17,10 +17,7 @@ import pydle
 discordMSG = []
 
 #irc
-ircNickname = "nickName"
-ircServerIP = "serverIp"
-ircPort = 6667
-ircChannel = "#channelName"
+
 customStart = ""
 
 
@@ -163,23 +160,21 @@ async def on_message(message): #waits for the discord message event and pulls it
         if str(channelToUse.name) == str(message.channel) and str(message.author) != botName: #this checks to see if it is using the correct discord channel to make sure its the right channel. also checks to make sure the botname isnt our discord bot name
             print("{0} : {1}".format(message.author,message.content)) #prints this to the screen
             #await client.send_message(message.channel, 'Hello.')          
-            ircSendMSG(message.author,ircChannel,message.content)
+            ircSendMSG(message.author,config["ircChannel"],message.content)
 
 ##file load and save stuff
 
-def fileSave(config):
+def fileSave(fileName,config):
     print("Saving")
-    f = open("config.json", 'w') #opens the file your saving to with write permissions
-    f.write(json.dumps(config) + "\n") #writes the string to a file
+    f = open(fileName, 'w') #opens the file your saving to with write permissions
+    f.write(json.dumps(config,sort_keys=True, indent=4 ) + "\n") #writes the string to a file
     f.close() #closes the file io
 
-
-def fileLoad():
-    f = open("config.json", 'r') #opens the file your saving to with read permissions 
-    config = "" 
-    for line in f: #gets the information from the file
-        config = json.loads(line) #this will unserialize the table
+def fileLoad(fileName):#loads files
+    with open(fileName, 'r') as handle:#loads the json file
+        config = json.load(handle) 
     return config
+
 
 
 ##first run stuff
@@ -197,7 +192,6 @@ def getToken(): #gets the token
             sys.exit(0) #this is a work around for the bug that causes the code not think the discord token is valid even tho it is after the first time of it being invalid
         else:
             realToken = "true"
-
 
 async def getFirstRunInfo():
     global config 
@@ -231,7 +225,7 @@ Ex. "{0} : {1}: """)
 {1} is the placeholder for the message
 Ex. "{0} : {1}": """)
     print("Configuration complete")
-    fileSave(config) #saves the file
+    fileSave("config.json",config) #saves the file
     print("Please run the command normally to run the bot")
     await client.close()
             
@@ -239,7 +233,7 @@ if os.path.isfile("config.json") == False:#checks if the file exists and if it d
     print("Config missing. This may mean this is your first time setting this up")
     firstRun = "on"
 else:
-    config = fileLoad() #if it exists try to load it
+    config = fileLoad("config.json") #if it exists try to load it
 if firstRun == "on":
     config = {"channelName": "", "pageToken": "", "serverName": "", "discordToken": "","discordToIRCFormating": "", "IRCToDiscordFormatting":""}
     getToken()
@@ -257,7 +251,9 @@ class MyClient(pydle.Client):
     def on_connect(self):
         super().on_connect()
         # Can't greet many people without joining a channel.
-        self.join(ircChannel)
+        
+        self.join(config["ircChannel"])
+        
 
     def on_join(self, channel, user):
         super().on_join(channel, user)
@@ -270,7 +266,7 @@ class MyClient(pydle.Client):
         while retry <= 50: #forces a reconnect if something goes wrong
             self._reset_connection_attributes() #resets connection info
             print("retrying connection") 
-            self.connect(ircServerIP,ircPort) #starts the connection
+            self.connect(config["ircServerIP"],config["ircPort"]) #starts the connection
             time.sleep(15) #waits so the client can finish connecting and things can actually be processes
             print(self.connected) #status connected or not
             if self.connected: #if connected to irc server leave this loop and be done.
@@ -285,6 +281,7 @@ class MyClient(pydle.Client):
         #self.connection.stop() #this stops the event loop when the client gives up just need to figure out how to determine that
         super().on_channel_message(target,by,message) 
         print(target + ":" + by +  ":" + message )
+        
         msg = config["IRCToDiscordFormatting"].format(target,by,message) #this reformats the irc chat for discord
         discordMSG.append(msg)#this adds the new message to the end of the array/list
 
@@ -300,15 +297,14 @@ def start():
     global ircClient
     print(ircClient)
     #while True:#this infinite loop should force the irc thread back when the irc client disconnects and closes
-    ircClient = MyClient(ircNickname)
-    ircClient.connect(ircServerIP) ##add a option for /pass user:pass this is how znc lets u login
+    ircClient = MyClient(config["ircNickname"])
+    ircClient.connect(config["ircServerIP"],config["ircPort"],password=config["ircPassword"]) ##add a option for /pass user:pass this is how znc lets u login
     print(ircClient)
     ircClient.handle_forever()
     print("irc died")
 
 def ircCheck():
     ircThread = threading.Thread(target=start) #creates the thread for the irc client
-
     ircThread.start() #starts the irc bot
     while True:
         time.sleep(2)
@@ -332,11 +328,3 @@ ircCheckThread.start()
 
 discordThread = threading.Thread(target=client.run(config["discordToken"]))#creates the thread for the discord bot
 discordThread.start() #starts the discord bot
-
-
-
-
-
-
-
-
